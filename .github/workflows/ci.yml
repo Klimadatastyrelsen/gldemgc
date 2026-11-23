@@ -3,7 +3,7 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  test:
+  test-gcp:
     name: "gcpcheck usage"
     strategy:
       matrix:
@@ -16,3 +16,17 @@ jobs:
         pixi-version: v0.79.0
         cache: true
     - run: pixi run gcpcheck -h
+
+  test-gca:
+    name: "dem_align usage"
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.runner }}
+    steps:
+    - uses: actions/checkout@v7
+    - uses: prefix-dev/setup-pixi@v0.11.2
+      with:
+        pixi-version: v0.79.0
+        cache: true
+    - run: pixi run dem_align -h
