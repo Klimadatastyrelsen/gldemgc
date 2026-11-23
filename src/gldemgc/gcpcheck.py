@@ -33,6 +33,8 @@ class Raster:
         band = self.dataset.GetRasterBand(1)
         # If srs is None, will use the dataset's native srs
         z = band.InterpolateAtGeolocation(x, y, srs, gdal.GRIORA_Bilinear)
+        if z is None: # occurs when sampling in nodata area
+            z = float('nan')
         return z
 
 class Gcps:
