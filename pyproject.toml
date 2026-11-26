@@ -11,6 +11,7 @@ requires = ["hatchling"]
 
 [project.scripts]
 gcpcheck = "gldemgc.gcpcheck:main"
+gcawindow = "gldemgc.gcawindow:main"
 
 [tool.pixi.workspace]
 channels = ["conda-forge"]
