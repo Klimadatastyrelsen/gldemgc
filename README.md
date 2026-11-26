@@ -3,7 +3,8 @@ GCP and GCA utility for Greenland DEM
 
 ## Installation
 To use the software, ensure you have [Pixi](https://pixi.prefix.dev/)
-installed.
+installed. Pixi will take care of ensuring an appropriate environment on first
+run.
 
 ## Usage
 ### GCP check
@@ -57,10 +58,38 @@ point will have the following fields:
 | `gcp_z`   | GCP Z value |
 | `z_diff`  | Difference between DEM and GCP (`dem_z` - (`gcp_z` - `geoid_z`)) |
 
-The following example takes the file `dem.vrt` as the input DEM to check. For its GCP database, it uses the file `gcps.gpkg`, which is filtered by `source = "myfriends"`, and their Z value is taken from the field `height`. The geoidal undulation to use is provided in geoid.tif. Output is written to the file `results.gpkg`:
+The following example takes the file `dem.vrt` as the input DEM to check. For
+its GCP database, it uses the file `gcps.gpkg`, which is filtered by
+`source = "myfriends"`, and their Z value is taken from the field `height`.
+The geoidal undulation to use is provided in geoid.tif. Output is written to
+the file `results.gpkg`:
 ```
 pixi run gcpcheck dem.vrt gcps.gpkg results.gpkg --geoid geoid.tif --gcp-z-field height --gcp-attribute-filter "source = \"myfriends\""
 ```
 
-### GCA check
-TODO
+### GCA check (experimental)
+The heavy lifting of GCA checks is done by the
+[demcoreg](https://github.com/dshean/demcoreg) toolkit developed by David
+Shean. For convenience, this project provides a utility for DEM preprocessing
+and easy installation of demcoreg.
+
+demcoreg works on materialized rasters, meaning that huge DEMs will not fit in
+memory for the analysis. Therefore, a preprocessing utility called `gcawindow`
+can extract a window of the DEM covering the GCA. The following command will
+read a (possibly large-scale) DEM at `dem.vrt`, read the extent of the GCA in
+`gca.tif`, and write the windowed part of the DEM to `windowed_dem.tif`:
+```
+pixi run gcawindow dem.vrt gca.tif windowed_dem.tif
+```
+
+This windowed DEM can now be passed to demcoreg. This project exposes
+demcoreg's `dem_align` tool as a Pixi task:
+```
+pixi run dem_align gca.tif windowed_dem.tif
+```
+The above command will try to align the raster in `windowed_dem.tif`, using
+`gca.tif` as reference. Refer to demcoreg's documentation (and `dem_align`'s
+help, with the `-h` argument) for further details.
+
+`dem_align` seems to be problematic on Windows due to
+[demcoreg#45](https://github.com/dshean/demcoreg/issues/45).
